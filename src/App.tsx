@@ -1,10 +1,8 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import "./App.scss";
-import { OrbitControls, Sphere } from "@react-three/drei";
-import vertexShader from "./shaders/example/vertex.glsl"
-import fragmentShader from "./shaders/example/fragment.glsl"
+import { OrbitControls } from "@react-three/drei";
 import { useMemo, useRef } from "react";
-import { ShaderMaterial } from "three";
+import { FBOParticles } from "./TextureWriter";
 
 const Scene = () => {
   const sphereRef = useRef<any>(null!);
@@ -16,19 +14,10 @@ const Scene = () => {
   }), [])
 
   useFrame((state) => {
-    const {clock} = state;
-
-    sphereRef.current.material.uniforms.uTime.value = clock.elapsedTime;
   });
 
   return <>
-    <Sphere ref={sphereRef}>
-      <shaderMaterial
-        vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
-        uniforms={uniforms}
-      />
-    </Sphere>
+    <FBOParticles/>
   </>
 }
 
@@ -36,10 +25,10 @@ const Scene = () => {
 function App() {
   return (
     <>
-      <Canvas>
+      <Canvas camera={{position: [0,0,1]}}>
+        <color attach={"background"} args={["#1d2262"]}/>
         <Scene/>
         <pointLight position={[0, 5, 0]} intensity={1} color="white"/>
-        <OrbitControls/>
       </Canvas>
     </>
   );
