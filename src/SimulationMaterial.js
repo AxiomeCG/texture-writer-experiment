@@ -36,6 +36,7 @@ class SimulationMaterial extends THREE.ShaderMaterial {
     );
     positionsTexture.needsUpdate = true;
 
+
     const simulationUniforms = {
       positions: { value: positionsTexture },
       uFrequency: { value: 0.25 },
@@ -48,11 +49,8 @@ class SimulationMaterial extends THREE.ShaderMaterial {
       vertexShader: simulationVertexShader,
       fragmentShader: simulationFragmentShader,
     });
-  }
 
-
-  setOldTexture(data) {
-    this.uniforms.positions.value = data
+    this.positionsTexture = positionsTexture
   }
 }
 

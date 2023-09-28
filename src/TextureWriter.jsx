@@ -1,8 +1,8 @@
-import {useFBO} from '@react-three/drei';
+import {Plane, useFBO} from '@react-three/drei';
 import {extend, useFrame} from '@react-three/fiber';
-import {useMemo, useRef} from 'react';
+import {useEffect, useMemo, useRef} from 'react';
 import * as THREE from 'three';
-import {Vector2} from 'three';
+import {DataTexture, Vector2} from 'three';
 import SimulationMaterial from './SimulationMaterial.js';
 
 extend({SimulationMaterial: SimulationMaterial});
@@ -49,13 +49,24 @@ export const FBOParticles = () => {
   const uvs = new Float32Array([0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0]);
 
   // Create our FBO render target
-  const renderTarget = useFBO(size, size, {
+  const renderTarget1 = useFBO(size, size, {
+    minFilter: THREE.NearestFilter,
+    magFilter: THREE.NearestFilter,
+    format: THREE.RGBAFormat,
+    stencilBuffer: false,
+    type: THREE.FloatType,
+
+  });
+
+  const renderTarget2 = useFBO(size, size, {
     minFilter: THREE.NearestFilter,
     magFilter: THREE.NearestFilter,
     format: THREE.RGBAFormat,
     stencilBuffer: false,
     type: THREE.FloatType,
   });
+
+  const isRenderTarget1 = useRef(true);
 
   // Generate a "buffer" of vertex of size "size" with normalized coordinates
   const particlesPosition = useMemo(() => {
@@ -77,30 +88,33 @@ export const FBOParticles = () => {
     }),
     []
   );
+  let savedTexture = null;
+
+  const meshBasicMaterialRef = useRef()
+
 
   useFrame((state) => {
     const {gl, clock} = state;
+    gl.autoClear = false;
+
+    simulationMaterialRef.current.uniforms.uMouse.value = new Vector2(state.mouse.x, -state.mouse.y);
+    simulationMaterialRef.current.uniforms.positions.value = isRenderTarget1.current ? renderTarget2.texture: renderTarget1.texture;
+
     // Set the current render target to our FBO
-    gl.setRenderTarget(renderTarget);
-    gl.clear();
-    // Render the simulation material with square geometry in the render target
+    gl.setRenderTarget(isRenderTarget1.current ? renderTarget1: renderTarget2);
+
     gl.render(scene, camera);
-    // Revert to the default render target
+
     gl.setRenderTarget(null);
 
-    // Read the position data from the texture field of the render target
-    // and send that data to the final shaderMaterial via the `uPositions` uniform
-    //points.current.material.uniforms.uPositions.value = renderTarget.texture;
+    isRenderTarget1.current = !isRenderTarget1.current;
 
-
-    simulationMaterialRef.current.uniforms.uTime.value = clock.elapsedTime;
-    simulationMaterialRef.current.uniforms.uMouse.value = new Vector2(state.mouse.x, -state.mouse.y);
   });
 
   return (
     <>
       {/* Render off-screen our simulation material and square geometry */}
-      <mesh>
+      <mesh visible={true}>
         <simulationMaterial ref={simulationMaterialRef} args={[size]}/>
         <bufferGeometry>
           <bufferAttribute
@@ -117,6 +131,8 @@ export const FBOParticles = () => {
           />
         </bufferGeometry>
       </mesh>
+
+
       {/*<points ref={points}>*/}
       {/*  <bufferGeometry>*/}
       {/*    <bufferAttribute*/}
