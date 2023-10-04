@@ -92,23 +92,38 @@ export const FBOParticles = () => {
 
   const meshBasicMaterialRef = useRef()
 
+  const isFirstTimeRef = useRef(true);
+  const currentRenderTargetRef = useRef(renderTarget1);
+  const previousRenderTargetRef = useRef(renderTarget2)
+
+  function pingPongRendering(gl) {
+    const temp = currentRenderTargetRef.current;
+    currentRenderTargetRef.current = previousRenderTargetRef.current;
+    previousRenderTargetRef.current = temp
+  }
 
   useFrame((state) => {
-    const {gl, clock} = state;
+    const { gl, clock } = state;
     gl.autoClear = false;
 
-    simulationMaterialRef.current.uniforms.uMouse.value = new Vector2(state.mouse.x, -state.mouse.y);
-    simulationMaterialRef.current.uniforms.positions.value = isRenderTarget1.current ? renderTarget2.texture: renderTarget1.texture;
+    simulationMaterialRef.current.uniforms.uMouse.value = new Vector2(
+      state.mouse.x,
+      -state.mouse.y,
+    );
+    if (!isFirstTimeRef.current) {
+      simulationMaterialRef.current.uniforms.positions.value = previousRenderTargetRef.current;
+    }
+
 
     // Set the current render target to our FBO
-    gl.setRenderTarget(isRenderTarget1.current ? renderTarget1: renderTarget2);
-
+    gl.setRenderTarget(currentRenderTargetRef.current);
+    gl.clear();
     gl.render(scene, camera);
 
     gl.setRenderTarget(null);
+    pingPongRendering(gl);
 
-    isRenderTarget1.current = !isRenderTarget1.current;
-
+    isFirstTimeRef.current = false;
   });
 
   return (
