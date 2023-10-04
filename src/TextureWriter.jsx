@@ -16,14 +16,7 @@ export const FBOParticles = () => {
 
   // Create a camera and a scene for our FBO
   const scene = new THREE.Scene();
-  const camera = new THREE.OrthographicCamera(
-    -1,
-    1,
-    1,
-    -1,
-    1 / Math.pow(2, 53),
-    1
-  );
+  const camera = new THREE.OrthographicCamera( - 1, 1, 1, - 1, 0, 1 );
 
   // Create a simple square geometry with custom uv and positions attributes
   const positions = new Float32Array([
@@ -57,7 +50,13 @@ export const FBOParticles = () => {
     type: THREE.FloatType,
   });
 
-  const renderTarget2 = renderTarget1.clone()
+  const renderTarget2 = useFBO(size, size, {
+    minFilter: THREE.NearestFilter,
+    magFilter: THREE.NearestFilter,
+    format: THREE.RGBAFormat,
+    stencilBuffer: false,
+    type: THREE.FloatType,
+  });
 
   const isRenderTarget1 = useRef(true);
 
@@ -101,8 +100,9 @@ export const FBOParticles = () => {
 
     simulationMaterialRef.current.uniforms.uMouse.value = new Vector2(
       state.mouse.x,
-      state.mouse.y,
+      -state.mouse.y,
     );
+
     if (!isFirstTimeRef.current) {
       simulationMaterialRef.current.uniforms.positions.value = previousRenderTargetRef.current.texture;
     }
@@ -125,23 +125,10 @@ export const FBOParticles = () => {
     <>
       {/* Render off-screen our simulation material and square geometry */}
       {createPortal(
-        <mesh>
+        <Plane args={[2,2,64, 64]} position={[0,0,-0.01]}>
           <simulationMaterial ref={simulationMaterialRef} args={[size]} />
-          <bufferGeometry>
-            <bufferAttribute
-              attach="attributes-position"
-              count={positions.length / 3}
-              array={positions}
-              itemSize={3}
-            />
-            <bufferAttribute
-              attach="attributes-uv"
-              count={uvs.length / 2}
-              array={uvs}
-              itemSize={2}
-            />
-          </bufferGeometry>
-        </mesh>,
+
+        </Plane>,
         scene
       )}
       <mesh>
