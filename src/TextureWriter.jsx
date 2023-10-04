@@ -1,4 +1,4 @@
-import {Plane, useFBO} from '@react-three/drei';
+import {Center, Plane, useFBO} from '@react-three/drei';
 import {createPortal, extend, useFrame} from '@react-three/fiber';
 import {useEffect, useMemo, useRef} from 'react';
 import * as THREE from 'three';
@@ -10,7 +10,7 @@ import vertexShader from './vertexShader.js';
 extend({SimulationMaterial: SimulationMaterial});
 
 export const FBOParticles = () => {
-  const size = 4096;
+  const size = 4092;
 
   // This reference gives us direct access to our points
   // const points = useRef();
@@ -128,7 +128,6 @@ export const FBOParticles = () => {
       state.mouse.y,
     );
 
-    console.log(isMouseClicked.current)
     isMouseStaticRef.current = (state.mouse.x === previousMouseRef.current.x && state.mouse.y === previousMouseRef.current.y )|| !isMouseClicked.current;
     const newAngle = Math.atan2(state.mouse.x - previousMouseRef.current.x, state.mouse.y - previousMouseRef.current.y);
 
@@ -189,7 +188,8 @@ export const FBOParticles = () => {
       {/*  </bufferGeometry>*/}
       {/*</mesh>*/}
 
-      <points ref={points}>
+      <Center position={[0,-0.25,0]}>
+      <points ref={points} rotation-x={-Math.PI/2.5} position={[-0.75,0,0.5]} scale={2}>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
@@ -206,6 +206,7 @@ export const FBOParticles = () => {
           uniforms={uniforms}
         />
       </points>
+      </Center>
     </>
   );
 };

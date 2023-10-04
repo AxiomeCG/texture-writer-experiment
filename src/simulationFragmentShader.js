@@ -1,6 +1,8 @@
 import glslCurlNoise from './glslCurlNoise';
 
 const fragmentShader = `
+precision highp float;
+precision highp sampler2D;
 
 uniform sampler2D positions;
 uniform float uTime;
