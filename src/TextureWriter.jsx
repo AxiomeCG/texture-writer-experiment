@@ -96,7 +96,7 @@ export const FBOParticles = () => {
   const currentRenderTargetRef = useRef(renderTarget1);
   const previousRenderTargetRef = useRef(renderTarget2)
 
-  function pingPongRendering(gl) {
+  function pingPong() {
     const temp = currentRenderTargetRef.current;
     currentRenderTargetRef.current = previousRenderTargetRef.current;
     previousRenderTargetRef.current = temp
@@ -121,7 +121,7 @@ export const FBOParticles = () => {
     gl.render(scene, camera);
 
     gl.setRenderTarget(null);
-    pingPongRendering(gl);
+    pingPong();
 
     isFirstTimeRef.current = false;
   });
