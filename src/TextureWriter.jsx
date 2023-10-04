@@ -4,11 +4,13 @@ import {useEffect, useMemo, useRef} from 'react';
 import * as THREE from 'three';
 import {DataTexture, Vector2} from 'three';
 import SimulationMaterial from './SimulationMaterial.js';
+import fragmentShader from './fragmentShader.js';
+import vertexShader from './vertexShader.js';
 
 extend({SimulationMaterial: SimulationMaterial});
 
 export const FBOParticles = () => {
-  const size = 128;
+  const size = 4096;
 
   // This reference gives us direct access to our points
   // const points = useRef();
@@ -82,6 +84,7 @@ export const FBOParticles = () => {
   );
   let savedTexture = null;
 
+  const points = useRef();
   const meshBasicMaterialRef = useRef()
 
   const isFirstTimeRef = useRef(true);
@@ -94,21 +97,58 @@ export const FBOParticles = () => {
     previousRenderTargetRef.current = temp
   }
 
+  const previousMouseRef = useRef(new Vector2(0, 0));
+  const oldAngleRef = useRef(0);
+  const isMouseStaticRef = useRef(true);
+  const isMouseClicked = useRef(false);
+
+  useEffect(() => {
+    const onPointerDown = () => {
+      isMouseClicked.current = true
+    }
+
+    const onPointerUp = () => {
+      isMouseClicked.current = false
+    }
+    document.addEventListener('pointerdown',  onPointerDown)
+    document.addEventListener('pointerup',  onPointerUp)
+
+    return () => {
+      document.removeEventListener('pointerdown',  onPointerDown)
+      document.removeEventListener('pointerup',  onPointerDown)
+    }
+  }, []);
+
   useFrame((state) => {
     const { gl, clock } = state;
     gl.autoClear = false;
 
     simulationMaterialRef.current.uniforms.uMouse.value = new Vector2(
       state.mouse.x,
-      -state.mouse.y,
+      state.mouse.y,
     );
+
+    console.log(isMouseClicked.current)
+    isMouseStaticRef.current = (state.mouse.x === previousMouseRef.current.x && state.mouse.y === previousMouseRef.current.y )|| !isMouseClicked.current;
+    const newAngle = Math.atan2(state.mouse.x - previousMouseRef.current.x, state.mouse.y - previousMouseRef.current.y);
+
+    if (isMouseStaticRef.current) {
+      oldAngleRef.current = newAngle;
+    }
+    simulationMaterialRef.current.uniforms.uAngle.value =  isMouseStaticRef.current ? oldAngleRef.current : newAngle;
+    simulationMaterialRef.current.uniforms.uIsStaticMouse.value = isMouseStaticRef.current;
+
+    previousMouseRef.current.set(state.mouse.x, state.mouse.y);
+    oldAngleRef.current = newAngle;
 
     if (!isFirstTimeRef.current) {
       simulationMaterialRef.current.uniforms.positions.value = previousRenderTargetRef.current.texture;
+      simulationMaterialRef.current.uniforms.uTime.value = clock.elapsedTime;
     }
+    points.current.material.uniforms.uPositions.value = previousRenderTargetRef.current.texture;
 
+    //meshBasicMaterialRef.current.map = previousRenderTargetRef.current.texture;
 
-    meshBasicMaterialRef.current.map = previousRenderTargetRef.current.texture;
 
 
     // Set the current render target to our FBO
@@ -131,23 +171,41 @@ export const FBOParticles = () => {
         </Plane>,
         scene
       )}
-      <mesh>
-        <meshBasicMaterial ref={meshBasicMaterialRef} />
+      {/*<mesh>*/}
+      {/*  <meshBasicMaterial ref={meshBasicMaterialRef} />*/}
+      {/*  <bufferGeometry>*/}
+      {/*    <bufferAttribute*/}
+      {/*      attach="attributes-position"*/}
+      {/*      count={positions.length / 3}*/}
+      {/*      array={positions}*/}
+      {/*      itemSize={3}*/}
+      {/*    />*/}
+      {/*    <bufferAttribute*/}
+      {/*      attach="attributes-uv"*/}
+      {/*      count={uvs.length / 2}*/}
+      {/*      array={uvs}*/}
+      {/*      itemSize={2}*/}
+      {/*    />*/}
+      {/*  </bufferGeometry>*/}
+      {/*</mesh>*/}
+
+      <points ref={points}>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={positions.length / 3}
-            array={positions}
+            count={particlesPosition.length / 3}
+            array={particlesPosition}
             itemSize={3}
           />
-          <bufferAttribute
-            attach="attributes-uv"
-            count={uvs.length / 2}
-            array={uvs}
-            itemSize={2}
-          />
         </bufferGeometry>
-      </mesh>
+        <shaderMaterial
+          //blending={THREE.AdditiveBlending}
+          depthWrite={true}
+          fragmentShader={fragmentShader}
+          vertexShader={vertexShader}
+          uniforms={uniforms}
+        />
+      </points>
     </>
   );
 };

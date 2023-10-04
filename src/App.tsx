@@ -28,6 +28,7 @@ function App() {
       <Canvas camera={{position: [0,0,1]}}>
         <color attach={"background"} args={["#1d2262"]}/>
         <Scene/>
+        <OrbitControls/>
         <pointLight position={[0, 5, 0]} intensity={1} color="white"/>
       </Canvas>
     </>
