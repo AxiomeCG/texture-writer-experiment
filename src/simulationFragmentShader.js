@@ -17,9 +17,10 @@ void main() {
   
   vec2 currentMouse = (uMouse + 1.0) * 0.5;
 
-  if(vUv.x < currentMouse.x + 0.1 && vUv.x > currentMouse.x - 0.1 && vUv.y < currentMouse.y + 0.1 && vUv.y > currentMouse.y - 0.1) {
+  if(vUv.x < currentMouse.x + 0.02 && vUv.x > currentMouse.x - 0.02 && vUv.y < currentMouse.y + 0.02 && vUv.y > currentMouse.y - 0.02) {
      pos += vec3(1.0, 1.0, 1.0);
   }
+
   
   gl_FragColor = vec4(pos, 1.0);
 

@@ -1,5 +1,5 @@
 import {Plane, useFBO} from '@react-three/drei';
-import {extend, useFrame} from '@react-three/fiber';
+import {createPortal, extend, useFrame} from '@react-three/fiber';
 import {useEffect, useMemo, useRef} from 'react';
 import * as THREE from 'three';
 import {DataTexture, Vector2} from 'three';
@@ -55,16 +55,9 @@ export const FBOParticles = () => {
     format: THREE.RGBAFormat,
     stencilBuffer: false,
     type: THREE.FloatType,
-
   });
 
-  const renderTarget2 = useFBO(size, size, {
-    minFilter: THREE.NearestFilter,
-    magFilter: THREE.NearestFilter,
-    format: THREE.RGBAFormat,
-    stencilBuffer: false,
-    type: THREE.FloatType,
-  });
+  const renderTarget2 = renderTarget1.clone()
 
   const isRenderTarget1 = useRef(true);
 
@@ -108,16 +101,18 @@ export const FBOParticles = () => {
 
     simulationMaterialRef.current.uniforms.uMouse.value = new Vector2(
       state.mouse.x,
-      -state.mouse.y,
+      state.mouse.y,
     );
     if (!isFirstTimeRef.current) {
-      simulationMaterialRef.current.uniforms.positions.value = previousRenderTargetRef.current;
+      simulationMaterialRef.current.uniforms.positions.value = previousRenderTargetRef.current.texture;
     }
+
+
+    meshBasicMaterialRef.current.map = previousRenderTargetRef.current.texture;
 
 
     // Set the current render target to our FBO
     gl.setRenderTarget(currentRenderTargetRef.current);
-    gl.clear();
     gl.render(scene, camera);
 
     gl.setRenderTarget(null);
@@ -129,8 +124,28 @@ export const FBOParticles = () => {
   return (
     <>
       {/* Render off-screen our simulation material and square geometry */}
-      <mesh visible={true}>
-        <simulationMaterial ref={simulationMaterialRef} args={[size]}/>
+      {createPortal(
+        <mesh>
+          <simulationMaterial ref={simulationMaterialRef} args={[size]} />
+          <bufferGeometry>
+            <bufferAttribute
+              attach="attributes-position"
+              count={positions.length / 3}
+              array={positions}
+              itemSize={3}
+            />
+            <bufferAttribute
+              attach="attributes-uv"
+              count={uvs.length / 2}
+              array={uvs}
+              itemSize={2}
+            />
+          </bufferGeometry>
+        </mesh>,
+        scene
+      )}
+      <mesh>
+        <meshBasicMaterial ref={meshBasicMaterialRef} />
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
@@ -146,25 +161,6 @@ export const FBOParticles = () => {
           />
         </bufferGeometry>
       </mesh>
-
-
-      {/*<points ref={points}>*/}
-      {/*  <bufferGeometry>*/}
-      {/*    <bufferAttribute*/}
-      {/*      attach="attributes-position"*/}
-      {/*      count={particlesPosition.length / 3}*/}
-      {/*      array={particlesPosition}*/}
-      {/*      itemSize={3}*/}
-      {/*    />*/}
-      {/*  </bufferGeometry>*/}
-      {/*  <shaderMaterial*/}
-      {/*    blending={THREE.AdditiveBlending}*/}
-      {/*    depthWrite={false}*/}
-      {/*    fragmentShader={fragmentShader}*/}
-      {/*    vertexShader={vertexShader}*/}
-      {/*    uniforms={uniforms}*/}
-      {/*  />*/}
-      {/*</points>*/}
     </>
   );
 };
