@@ -26,13 +26,16 @@ const Scene = () => {
 function App() {
   return (
     <>
+      <div className={"text-container"}>
+        <span className={"text"}>Anything World</span>
+
+      </div>
       <Canvas camera={{position: [0,0,1]}}>
-        <color attach={"background"} args={["#1d2262"]}/>
         <Scene/>
-        <OrbitControls enabled={true}/>
+        <OrbitControls enabled={false}/>
         <pointLight position={[0, 5, 0]} intensity={1} color="white"/>
         <EffectComposer>
-          <N8AO intensity={10} halfRes={true}/>
+          <N8AO intensity={10} halfRes={false}/>
         </EffectComposer>
       </Canvas>
     </>

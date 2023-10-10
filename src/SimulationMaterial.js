@@ -41,9 +41,9 @@ const getGroundData = (width, height) => {
     const theta = THREE.MathUtils.randFloatSpread(360);
     const phi = THREE.MathUtils.randFloatSpread(360);
 
-    data[stride] = 0.8;
-    data[stride + 1] =  0.8;
-    data[stride + 2] =  0.8;
+    data[stride] = 1.0;
+    data[stride + 1] =  1.0;
+    data[stride + 2] =  1.0;
     data[stride + 3] =  1.0; // this value will not have any impact
 
   }
@@ -69,6 +69,7 @@ class SimulationMaterial extends THREE.ShaderMaterial {
       uTime: { value: 0 },
       uAngle: { value: 0 },
       uIsStaticMouse: { value: true },
+      uBrushSize: { value: 0 },
       uMouse: { value: new THREE.Vector2() },
     };
 
