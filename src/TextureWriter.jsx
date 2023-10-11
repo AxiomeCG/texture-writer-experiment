@@ -10,7 +10,7 @@ import {damp, damp2, dampAngle} from 'maath/easing';
 
 extend({SimulationMaterial: SimulationMaterial});
 
-export const FBOParticles = () => {
+export const TextureWriter = () => {
     const size = 2048;
 
     // This reference gives us direct access to our points
@@ -134,13 +134,13 @@ export const FBOParticles = () => {
         }
     }, []);
 
-    const brushSizeRef = useRef(0);
+    const brushSizeRef = useRef(0.3);
 
     useFrame((state, delta) => {
         const {gl, clock} = state;
         gl.autoClear = false;
 
-        damp2(simulationMaterialRef.current.uniforms.uMouse.value, new Vector2(state.mouse.x, state.mouse.y), 0.1, delta);
+        damp2(simulationMaterialRef.current.uniforms.uMouse.value, new Vector2(state.mouse.x, state.mouse.y), 0.01, delta);
 
 
         isMouseStaticRef.current = (state.mouse.x === previousMouseRef.current.x && state.mouse.y === previousMouseRef.current.y);
@@ -151,10 +151,7 @@ export const FBOParticles = () => {
 
         if (!isMouseStaticRef.current) {
             dampAngle(oldAngleRef, 'current', targetAngleRef.current, 0.05, delta);
-            damp(brushSizeRef, 'current', 0.2, 1, delta);
-            console.log(brushSizeRef.current)
         } else {
-            damp(brushSizeRef, 'current', 0, 3, delta);
         }
         simulationMaterialRef.current.uniforms.uAngle.value = oldAngleRef.current;
         simulationMaterialRef.current.uniforms.uIsStaticMouse.value = isMouseStaticRef.current;
@@ -215,7 +212,7 @@ export const FBOParticles = () => {
             {/*  </bufferGeometry>*/}
             {/*</mesh>*/}
 
-                <Plane visible={true}>
+                <Plane visible={false}>
                     <meshBasicMaterial ref={debugMeshBasicMaterialRef}/>
                 </Plane>
 

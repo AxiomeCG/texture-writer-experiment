@@ -1,14 +1,86 @@
 @import url('https://fonts.cdnfonts.com/css/rajdhani');
+.text-container {
+  position: absolute;
+  bottom: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  button {
+    font-family: 'Rajdhani', sans-serif;
+    width: fit-content;
+    mix-blend-mode: difference;
+    font-size: 1.3rem;
+    background: none;
+    border: none;
+  }
+
+
+}
 .text {
-  font-size: 6rem;
-  mix-blend-mode: difference;
-  color: #000;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
+  mix-blend-mode: difference;
   text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
   font-family: 'Rajdhani', sans-serif;
   font-weight: 700;
+  font-size: 6rem;
+  color: #000;
+}
+
+
+.navigation {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1;
+
+  &__wrapper {
+    padding: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__branding{
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    img {
+      max-width: 24px;
+    }
+    &__title {
+      font-size: 2rem;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 300;
+      letter-spacing: -2px;
+    }
+  }
+
+  &__links{
+
+   ul {
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     gap: 1rem;
+     list-style: none;
+     li {
+       font-size: 1.2rem;
+       font-family: 'Rajdhani', sans-serif;
+       font-weight: 300;
+       letter-spacing: -1px;
+     }
+   }
+  }
+
 }

@@ -75,12 +75,26 @@ float displacementBrush(vec2 st, vec3 pos, vec2 currentMouse, float brushSize){
     
       
       //return 0.05 * strength * clamp(sin(0.1*(1.0/brushSize) * (1.0 - strengthX) * 300.0),-1.0,1.0);
-      return (1.0 - clamp(distance,0.0,1.0)) * snoise(st * 100.0);
+      return 1.0 - clamp(distance,0.0,1.0);
   } 
   
   
   return 0.0;
 }
+
+float displacementBrush2(vec2 st, vec3 pos, vec2 currentMouse, float brushSize, float distFromCenter, float feathering, float hollowEffect) {
+
+    float dist = distance(currentMouse, st);
+
+    if(dist < brushSize * 2.0 * rand(brushSize)) {
+        float strength = pow(1.0 - distFromCenter / brushSize, 3.0) * feathering * hollowEffect;
+        return clamp(strength, 0.0, 1.0);
+    } 
+
+    return 0.0;
+}
+
+
 
 void main() {
 
@@ -90,15 +104,25 @@ void main() {
   
   vec2 currentMouse = (uMouse + 1.0) * 0.5;
   
-  if( pos.b < 1.0) pos += 0.0005;
+  vec2 boundaryMin = vec2(currentMouse.x - brushSize, currentMouse.y - brushSize);
+  vec2 boundaryMax = vec2(currentMouse.x + brushSize, currentMouse.y + brushSize);
+  vec2 center = (boundaryMin + boundaryMax) * 0.5;
+  float distFromCenter = distance(vUv, center);
   
-  if(!uIsStaticMouse) pos -= displacementBrush(vUv, pos, currentMouse, brushSize);
+  float noiseValue = snoise(vUv * 10.0); // You might need to play with the multiplier here.
+  float feathering = mix(1.0, noiseValue, 0.2); // This will add some feathering effect to the edges. Adjust as needed.
+  float hollowNoise = snoise(vUv * 15.0); // Increased granularity
+  float hollowEffectBase = sin(distFromCenter * 3.14159 * 2.0) * 0.5 + 0.5;
+  float hollowEffect = mix(hollowEffectBase, 1.0 - hollowNoise, 0.5 * hollowEffectBase);
   
-  gl_FragColor = vec4(clamp(pos,0.0,1.0), 1.0);
-
-
-
- 
+  float distToCenter = distance(vUv, vec2(0.5, 0.5)) + noiseValue * 0.1;
+  float fadeFactor = 1.0 - clamp(distToCenter * 2.1, 0.0, 1.0);
+  if(!uIsStaticMouse) pos -= fadeFactor * clamp(displacementBrush2(vUv, pos, currentMouse, brushSize,distFromCenter, feathering, hollowEffect) *2.0, 0.0, 1.0);
+  
+  if(uIsStaticMouse && pos.r > 0.50 &&pos.r < 1.0) pos +=  0.0075 * (clamp(snoise(rotate(vUv, sin(uTime)) ),0.0,1.0));
+  if(uIsStaticMouse && pos.r < 0.50) pos +=  0.0005;
+  
+  gl_FragColor = vec4(clamp(pos,0.0,1.0), 1.0); 
 }
 `
 

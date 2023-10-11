@@ -2,7 +2,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import "./App.scss";
 import { OrbitControls } from "@react-three/drei";
 import { useMemo, useRef } from "react";
-import { FBOParticles } from "./TextureWriter";
+import { TextureWriter } from "./TextureWriter";
 import { EffectComposer, N8AO } from "@react-three/postprocessing";
 
 const Scene = () => {
@@ -18,7 +18,7 @@ const Scene = () => {
   });
 
   return <>
-    <FBOParticles/>
+    <TextureWriter/>
   </>
 }
 
@@ -26,8 +26,25 @@ const Scene = () => {
 function App() {
   return (
     <>
+      <nav className={"navigation"}>
+        <div className={"navigation__wrapper"}>
+          <div className={"navigation__branding"}>
+            <img src={'/logo.svg'}/>
+            <span className={"navigation__branding__title"}>Adam NAILI</span>
+          </div>
+          <div className={"navigation__links"}>
+            <ul>
+              <li>Home</li>
+              <li>About</li>
+              <li>Contact</li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+      <span className={"text"}>Anything World</span>
+
       <div className={"text-container"}>
-        <span className={"text"}>Anything World</span>
+        <button>Discover</button>
 
       </div>
       <Canvas camera={{position: [0,0,1]}}>
