@@ -19,7 +19,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "sass": "^1.63.6",
-    "three": "^0.153.0"
+    "three": "^0.153.0",
+    "valtio": "^1.11.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.14",

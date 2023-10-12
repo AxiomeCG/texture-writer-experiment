@@ -1,9 +1,6 @@
 import glslCurlNoise from './glslCurlNoise';
 
 const fragmentShader = `
-precision highp float;
-precision highp sampler2D;
-
 uniform sampler2D positions;
 uniform float uTime;
 uniform float uFrequency;
@@ -11,6 +8,7 @@ uniform vec2 uMouse;
 uniform bool uIsStaticMouse;
 uniform float uAngle;
 uniform float uBrushSize;
+uniform float uClearFactor;
 
 
 varying vec2 vUv;
@@ -119,8 +117,8 @@ void main() {
   float fadeFactor = 1.0 - clamp(distToCenter * 2.1, 0.0, 1.0);
   if(!uIsStaticMouse) pos -= fadeFactor * clamp(displacementBrush2(vUv, pos, currentMouse, brushSize,distFromCenter, feathering, hollowEffect) *2.0, 0.0, 1.0);
   
-  if(uIsStaticMouse && pos.r > 0.50 &&pos.r < 1.0) pos +=  0.0075 * (clamp(snoise(rotate(vUv, sin(uTime)) ),0.0,1.0));
-  if(uIsStaticMouse && pos.r < 0.50) pos +=  0.0005;
+  if(uClearFactor > 1. || (uIsStaticMouse && pos.r > 0.50 &&pos.r < 1.0)) pos +=  0.0075 * (clamp(snoise(rotate(vUv, sin(uTime)) ),0.0,1.0)) * uClearFactor;
+  if(uClearFactor > 1. || (uIsStaticMouse && pos.r < 0.50)) pos +=  0.0005 * uClearFactor;
   
   gl_FragColor = vec4(clamp(pos,0.0,1.0), 1.0); 
 }

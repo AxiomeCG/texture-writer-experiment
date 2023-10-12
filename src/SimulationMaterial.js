@@ -71,6 +71,9 @@ class SimulationMaterial extends THREE.ShaderMaterial {
       uIsStaticMouse: { value: true },
       uBrushSize: { value: 0 },
       uMouse: { value: new THREE.Vector2() },
+      uClearFactor: {
+        value: 1,
+      },
     };
 
     super({
